@@ -1,0 +1,16 @@
+main: partyChat.PartyChat
+name: PartyChat
+version: 1.0-1.21.1
+description: PartyChat - Chat in parties!
+api-version: 1.21
+Author: [Kre0lidge]
+
+commands:
+  party:
+    description: Primary command for the plugin
+  p:
+    description: Speak within a party
+  confirm:
+    description: Confirmation command for the plugin
+  pc:
+    description: Toggle party chat
