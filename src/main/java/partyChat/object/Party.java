@@ -2,22 +2,18 @@ package partyChat.object;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import partyChat.util.Chat;
 import partyChat.config.Lang;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Represents a party. Parties are saved to the parties.yml; Any change to
- * a party in this class will result in a save of the yml
- */
 public class Party {
     private final List<UUID> captainUUIDS = new ArrayList<>();
     private final List<UUID> memberUUIDS = new ArrayList<>();
@@ -49,7 +45,7 @@ public class Party {
     }
 
     /**
-     * get total amount of members, including leader and captains
+     * Get total amount of members, including leader and captains
      *
      * @return size of the party
      */
@@ -90,7 +86,12 @@ public class Party {
      * @param message: The message to broadcast to all online party members
      */
     public void broadcast(String message) {
-        getOnlineMembers().forEach(m -> m.sendMessage(Lang.PARTY_TAG + message));
+        for (UUID memberId : memberUUIDS) {
+            Player member = Bukkit.getPlayer(memberId);
+            if (member != null) {
+                member.sendMessage(message);
+            }
+        }
     }
 
     /**
@@ -152,7 +153,7 @@ public class Party {
 
         for (UUID id : memberUUIDS) {
             OfflinePlayer p = Bukkit.getOfflinePlayer(id);
-            if (list.length() > 0) {
+            if (!list.isEmpty()) {
                 list.append(", ");
             }
             list.append(p.getName());
@@ -188,20 +189,14 @@ public class Party {
     }
 
     public void displayPartyInfo(CommandSender s) {
-        String bar = Chat.GRAY + Chat.bar(17);
-
-        String a;
-        a = Chat.DARK_GRAY + "> " + Chat.AQUA;
-
-        s.sendMessage(bar + Chat.WHITE + " " + name + " " + bar);
-        s.sendMessage(a + "Leader: " + Chat.GRAY + Bukkit.getOfflinePlayer(leaderUUID).getName());
-
+        s.sendMessage(Chat.formatWithPrefix(String.valueOf(Lang.PARTY_TAG), "Party Info"));
+        s.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.PLAYER_NAME_LABEL.toString() + name));
+        s.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.LEADER + ": &7" + Bukkit.getOfflinePlayer(leaderUUID).getName()));
         if (!captainUUIDS.isEmpty()) {
-            s.sendMessage(a + StringUtils.capitalize(Lang.TRUSTED_RANK) + "s: " + Chat.GRAY + captainsAsString());
+            s.sendMessage(ChatColor.translateAlternateColorCodes('&', StringUtils.capitalize(Lang.TRUSTED_RANK + "s") + ": &7" + captainsAsString()));
         }
-
-        s.sendMessage(a + "Created on: " + Chat.GRAY + createdOn);
-        s.sendMessage(a + "Members: (" + memberUUIDS.size() + ") " + Chat.WHITE + getMembersAsString());
+        s.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.CREATED_ON + ": &7" + createdOn));
+        s.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.MEMBERS + ": &7(" + memberUUIDS.size() + ") &r" + getMembersAsString()));
     }
 
 }

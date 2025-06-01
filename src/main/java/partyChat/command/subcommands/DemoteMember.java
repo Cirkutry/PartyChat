@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import partyChat.config.Lang;
+import partyChat.util.Chat;
 
 public class DemoteMember extends PartySubCommand {
 
@@ -17,39 +18,48 @@ public class DemoteMember extends PartySubCommand {
     @Override
     public void execute(Player player, String[] args) {
         if (utils.getPlayerParty(player.getUniqueId()) == null) {
-            utils.fail(player, "You are not a member of any party.");
+            utils.fail(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_NOT_IN_PARTY.toString()));
             return;
         }
 
         Party party = utils.getPlayerParty(player.getUniqueId());
 
         if (!party.getLeader().equals(player.getUniqueId())) {
-            utils.fail(player, "Only the party leader can do that.");
+            utils.fail(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_NOT_LEADER.toString()));
             return;
         }
 
-        if (args.length == 1) {
-            utils.message(player, "Usage: /party demote <" + Lang.TRUSTED_RANK + ">");
+        if (args.length < 2) {
+            utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.USAGE_PROMOTE.toString()));
             return;
         }
 
-        @SuppressWarnings("deprecation")
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]); // the captain to be kicked
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
 
         if (!target.hasPlayedBefore() && !target.isOnline()) {
-            utils.fail(player, "Couldn't find that player.");
+            utils.fail(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_PLAYER_NOT_FOUND.toString()));
             return;
         }
 
         if (!party.getCaptains().contains(target.getUniqueId())) {
-            utils.fail(player, "That player is not a " + Lang.TRUSTED_RANK + ".");
+            utils.fail(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_CANNOT_PROMOTE_FURTHER.toString()));
             return;
         }
 
         String path = party.name() + ".captains";
-        utils.message(player, "You have demoted " + target.getName() + ".");
-        plugin.getYml().set(path, plugin.getYml().getStringList(path).remove(target.getUniqueId().toString()));
+        party.getCaptains().remove(target.getUniqueId());
+        plugin.getYml().set(path, party.getCaptains());
         plugin.save();
+
+        utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(),
+                Lang.PROMOTED_MESSAGE.toString(target.getName(), Lang.LEADER.toString(), player.getName())));
+
+        if (target.isOnline()) {
+            Player targetPlayer = target.getPlayer();
+            if (targetPlayer != null) {
+                utils.message(targetPlayer, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_CANNOT_PROMOTE_FURTHER.toString()));
+            }
+        }
     }
 
     @Override
@@ -59,6 +69,6 @@ public class DemoteMember extends PartySubCommand {
 
     @Override
     public String usage() {
-        return "/party demote <player>";
+        return Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.USAGE_KICK_MEMBER.toString());
     }
 }

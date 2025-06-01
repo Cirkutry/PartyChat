@@ -3,6 +3,7 @@ package partyChat;
 import partyChat.command.*;
 import partyChat.command.subcommands.*;
 import partyChat.config.ConfigHandler;
+import partyChat.config.Lang;
 import partyChat.object.Party;
 import partyChat.object.InviteHandler;
 import partyChat.util.PartyChatUtils;
@@ -28,20 +29,26 @@ public class PartyChat extends JavaPlugin implements CommandExecutor, TabComplet
     private YamlConfiguration partyYml;
 
     private File partyFile;
-    public static final String VERSION = "1.0-1.21.1";
+    public static final String VERSION = "1.1-1.21.1";
 
+    @Override
+    public void onLoad() {
+        loadLangFile();
+        getLogger().info("Language file loaded successfully!");
+    }
+
+    @Override
     public void onEnable() {
         partyFile = new File(getDataFolder(), "parties.yml");
         partyYml = YamlConfiguration.loadConfiguration(partyFile);
-
         rebuildPartyList();
 
         config = new ConfigHandler();
         inviteHandler = new InviteHandler(this);
         partyChatUtils = new PartyChatUtils(this);
 
+        // Register party subcommands
         TogglePartyChat togglePartyChat = new TogglePartyChat(this);
-
         subCommands.add(new CreateParty(this));
         subCommands.add(new DisbandParty(this));
         subCommands.add(new InviteMember(this));
@@ -56,17 +63,44 @@ public class PartyChat extends JavaPlugin implements CommandExecutor, TabComplet
         new CommandBase(this);
         new PartyChatCommand(this);
 
-        new ChatListener(this, togglePartyChat);
+        this.getCommand("partyreload").setExecutor(new ReloadCommand(this));
 
-        this.getCommand("pc").setExecutor(togglePartyChat);
+        new ChatListener(this, togglePartyChat);
+        Objects.requireNonNull(this.getCommand("pc")).setExecutor(togglePartyChat);
 
         new Metrics(this, 23689);
 
         getLogger().info("PartyChat v" + VERSION + " has loaded.");
     }
 
+    @Override
     public void onDisable() {
+        if (partyYml != null) {
+            save();
+        } else {
+            getLogger().warning("Could not save parties.yml because it was not initialized.");
+        }
         getLogger().info("PartyChat v" + VERSION + " has unloaded.");
+    }
+
+    public boolean reloadLang() {
+        try {
+            loadLangFile();
+            return true;
+        } catch (Exception e) {
+            getLogger().severe("Failed to reload language file: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void loadLangFile() {
+        File langFile = new File(getDataFolder(), "lang.yml");
+        if (!langFile.exists()) {
+            saveResource("lang.yml", false);
+        }
+        YamlConfiguration langConfig = YamlConfiguration.loadConfiguration(langFile);
+        Lang.setConfig(langConfig);
     }
 
     public PartyChatUtils getUtils() {
@@ -81,7 +115,9 @@ public class PartyChat extends JavaPlugin implements CommandExecutor, TabComplet
         return partyYml;
     }
 
-    public ConfigHandler config() { return config; }
+    public ConfigHandler config() {
+        return config;
+    }
 
     public List<Party> getParties() {
         return parties;
@@ -91,31 +127,36 @@ public class PartyChat extends JavaPlugin implements CommandExecutor, TabComplet
         return subCommands;
     }
 
-    /**
-     * Save the YML and re-create party list
-     */
     public void save() {
-        try {
-            partyYml.save(partyFile);
-            partyYml = YamlConfiguration.loadConfiguration(partyFile);
-            rebuildPartyList();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (partyYml != null && partyFile != null) {
+            try {
+                partyYml.save(partyFile);
+                partyYml = YamlConfiguration.loadConfiguration(partyFile);
+                rebuildPartyList();
+            } catch (IOException e) {
+                getLogger().severe("Failed to save the parties.yml file: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            getLogger().warning("parties.yml file is null, cannot save.");
         }
     }
 
-    /**
-     * Re-create party data from yml
-     * This is called when saving (aka upon any party data change)
-     */
     private void rebuildPartyList() {
         parties.clear();
-
         for (String key : partyYml.getKeys(false)) {
             ConfigurationSection theYml = partyYml.getConfigurationSection(key);
-
-            Party aParty = new Party(Objects.requireNonNull(theYml));
-            parties.add(aParty);
+            if (theYml == null) {
+                getLogger().warning("Invalid party data for key: " + key);
+                continue;
+            }
+            try {
+                Party aParty = new Party(theYml);
+                parties.add(aParty);
+            } catch (Exception e) {
+                getLogger().severe("Failed to load party data for key: " + key);
+                e.printStackTrace();
+            }
         }
     }
 }

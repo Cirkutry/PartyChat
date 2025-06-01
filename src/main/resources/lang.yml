@@ -1,0 +1,108 @@
+# Language file for PartyChat plugin
+#
+# Supports legacy formatting (&7, &c etc) and hec-color formatting (&#1e1e1e, &#ffffff etc)
+#
+# Make sure to have the same number of %s placeholders as the default language file as these get filled dynamically
+# and in the same order. For example in the line invite.sent: "&2You have sent %s an invite to join %s.",
+# the first %s it encounters will fill with the playername to whom the invite was sent to and the second one is filled
+# with the party name.
+
+party:
+  prefix: "&7[&9PartyChat&7]"
+help-menu:
+  title: "&fParty Commands:"
+  commands:
+    create: "&f/party create <name> - &7Create a party for your friends."
+    leave: "&f/party leave - &7Leave your current party."
+    invite: "&f/party invite <player> - &7Invite a player to join your party."
+    kick: "&f/party kick <player> - &7Remove a player from your party."
+    disband: "&f/party disband - &7Disband your current party."
+    promote: "&f/party promote <player> - &7Promote a member to captain."
+    toggle: "&f/pc - &7Toggle default chat between party and public."
+    message: "&f/p <message> - &7Send a message to your party."
+    reload: "&f/partyreload - &7Reload language file."
+
+roles:
+  leader: "&2Leader"
+  trusted-rank: "&2Captain"
+attributes:
+  created-on: "&2Created on"
+  members: "&2Members"
+  name: "&2Name"
+
+usage:
+  promote: "&2Usage: /party promote <player>"
+  kick-member: "&2Usage: /party kick <player>"
+  invite-member: "&2Usage: /party invite <player>"
+  info: "&2Usage: /party info <party>"
+
+errors:
+  not-in-party: "&cYou are not a member of any party."
+  not-leader: "&cOnly the party leader can do that."
+  player:
+    never-joined: "&cThat player has never joined the server before."
+  not-party-member: "&c%s is not a member of your party."
+  cannot-promote-further: "&cYou cannot promote that party member any further."
+  player-only: "&cSorry, that's a player-only command."
+  no-message: "&cYou need to provide a message to send!"
+  leader-cannot-leave: "&cYou are the party leader. To disband your party, type /party disband."
+  leader-cannot-kick: "&cOnly the party leader can do that."
+  not-valid-member: "&cThat's not a valid party member."
+  not-a-member: "&cThat player isn't a member of your party."
+  cannot-kick-self: "&cYou cannot kick yourself!"
+  # Below line is the only one with its own placeholder %trusted_rank% that only works in this line.
+  only-leader-or-staff-can-invite: "&cOnly a leader or party %trusted_rank% can invite players."
+  player-not-found: "&cCouldn't find that player. Are they online?"
+  cannot-invite-self: "&cYou're already a member of your party."
+  already-in-party: "&cThat player is already a member of a party."
+  existing-invite: "&cThat player already has an existing invite."
+  no-pending-invite: "&cYou do not have a pending invite."
+  party-not-found: "Couldn't find a party by that name."
+  no-permissions: "&cYou don't have permission to do that!"
+  party:
+    already-exists: "&cThe party \"%s\" already exists."
+
+messages:
+  chat:
+    mode:
+      public: "&2Default chat has been set to Public Chat."
+      party: "&2Default chat has been set to Party Chat."
+  promoted: "&2%s has been promoted to party %s by %s."
+  player-left-party: "&2%s has left the party."
+  member-kicked: "&2You have been kicked from the party."
+  player-kicked: "&2%s has been kicked from the party."
+  invite:
+    sent: "&2You have sent %s an invite to join %s."
+    received: "&2You have been invited by %s to join %s!"
+    respond: "&2Respond with /party accept or /party decline."
+    declined: "&2You declined the invite to join %s."
+    player-declined: "&2%s declined the invite to join %s."
+  joined-party: "&2You have joined the party %s!"
+  party-chat: "&f%s: &7%s"
+  party-message: "&f%s"
+  player-joined-party: "&2%s has joined the party!"
+  party-chat-hint: "&2Hint: Type /party <message> to talk within your party."
+  wait: "&2Please wait..."
+  description-promote: "&2Give a member invite and kick permissions."
+
+warnings:
+  disband-party:
+    start: "&cYou are about to disband %s forever."
+    confirm: "&cAre you sure? Type /party disband <partyName> confirm to continue."
+  create-party:
+    start: "&2You are about to create the party \"%s\"."
+    confirm: "&2Type /party create <name> confirm to confirm."
+
+info:
+  party:
+    disbanded: "&cYour party has been disbanded."
+    created: "&2You have created the party %s! Type /party help for a list of commands."
+
+error: "&cError: %s"
+confirm:
+  leave-party: "&2Are you sure you want to leave %s? Type /party leave confirm to continue."
+
+reload:
+  success: "&2Language file reloaded successfully!"
+  failure: "&cFailed to reload the language file."
+  no-permission: "&cYou don't have permission to use this command."

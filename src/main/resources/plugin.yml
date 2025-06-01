@@ -1,10 +1,9 @@
 main: partyChat.PartyChat
 name: PartyChat
-version: 1.0-1.21.1
+version: 1.1-1.21.1
 description: PartyChat - Chat in parties!
+authors: [Kre0lidge]
 api-version: 1.21
-Author: [Kre0lidge]
-
 commands:
   party:
     description: Primary command for the plugin
@@ -14,3 +13,5 @@ commands:
     description: Confirmation command for the plugin
   pc:
     description: Toggle party chat
+  partyreload:
+    description: Reload the plugin's configuration files

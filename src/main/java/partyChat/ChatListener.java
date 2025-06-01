@@ -1,5 +1,8 @@
 package partyChat;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import partyChat.config.Lang;
 import partyChat.object.Party;
 import partyChat.util.PartyChatUtils;
 import partyChat.command.subcommands.TogglePartyChat;
@@ -20,15 +23,22 @@ public class ChatListener implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    // This handles the case where a player has toggled default chat to party chat
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerChat(AsyncPlayerChatEvent e) {
-        Player p = e.getPlayer();
-        Party party = utils.getPlayerParty(p.getUniqueId());
+        Player player = e.getPlayer();
+        Party party = utils.getPlayerParty(player.getUniqueId());
 
-        if (utils.playerInParty(p.getUniqueId()) && togglePartyChat.isPlayerInPartyChat(p.getUniqueId())) {
+        if (utils.playerInParty(player.getUniqueId()) && togglePartyChat.isPlayerInPartyChat(player.getUniqueId())) {
             e.setCancelled(true);
 
-            party.broadcast(p.getName() + ": " + e.getMessage());
+            String messageTemplate = Lang.PARTY_CHAT_MESSAGE.toString();
+            String message = String.format(messageTemplate, player.getName(), e.getMessage());
+            String formattedMessageInGame = Lang.formatColors(message);
+            party.broadcast(formattedMessageInGame);
+
+            String formattedMessageConsole = ChatColor.stripColor(formattedMessageInGame);
+            Bukkit.getLogger().info("[PartyChatLogger] " + formattedMessageConsole);
         }
     }
 }

@@ -2,6 +2,7 @@ package partyChat.command;
 
 import partyChat.object.Party;
 import partyChat.PartyChat;
+import partyChat.util.Chat;
 import partyChat.util.PartyChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -10,14 +11,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import partyChat.util.Chat;
-
+import partyChat.config.Lang;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-Handles the base /party command
- */
+// Handles the base /party command
 public class CommandBase implements CommandExecutor, TabCompleter {
     private final PartyChat plugin;
     private final PartyChatUtils utils;
@@ -28,19 +26,17 @@ public class CommandBase implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
         this.utils = plugin.getUtils();
 
-        plugin.getCommand("party").setExecutor(this); // Register the command with Bukkit
+        plugin.getCommand("party").setExecutor(this);
         plugin.getCommand("pc").setExecutor(this);
-
-        // Load command names for auto completion
         plugin.getCommands().forEach(cmd -> subCmdNames.add(cmd.getName()));
     }
 
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String commandLabel, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Chat.RED + "All party commands are player only. Sorry!");
+            sender.sendMessage(Chat.formatWithPrefix(String.valueOf(Lang.PARTY_TAG), Lang.ERROR_NO_PERMISSIONS.toString()));
+
             return true;
         }
-
         if (args.length == 0) {
             Party party = utils.getPlayerParty(player.getUniqueId());
 
@@ -51,17 +47,18 @@ public class CommandBase implements CommandExecutor, TabCompleter {
             }
             return true;
         }
-
         if (args[0].equalsIgnoreCase("help")) {
             utils.displayMenu(player);
+            return true;
         }
-
         for (PartySubCommand subCommand : plugin.getCommands()) {
             if (subCommand.getName().equals(args[0])) {
                 subCommand.execute(player, args);
-                break;
+                return true;
             }
         }
+
+        player.sendMessage(Chat.formatWithPrefix(String.valueOf(Lang.PARTY_TAG), Lang.ERROR_NO_PERMISSIONS.toString()));
         return false;
     }
 
@@ -80,16 +77,16 @@ public class CommandBase implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("info"))
+            if (args[0].equalsIgnoreCase("info")) {
                 return getResults(args, utils.getPartyNames());
-
-            if (utils.getPlayerParty(player.getUniqueId()) == null) { // player ain't in a party
-                return List.of();
             }
 
             Party party = utils.getPlayerParty(player.getUniqueId());
+            if (party == null) {
+                return List.of();
+            }
 
-            // return online players
+
             if (args[0].equalsIgnoreCase("invite")) {
                 List<String> names = new ArrayList<>();
                 Bukkit.getOnlinePlayers().forEach(p -> {
@@ -98,11 +95,9 @@ public class CommandBase implements CommandExecutor, TabCompleter {
                 return names;
             }
 
-            // return all players in party, minus the leader
             if (args[0].equalsIgnoreCase("kick") || args[0].equalsIgnoreCase("promote")) {
                 List<String> membersMinusLeader = party.getMemberUsernames();
-                party.getMemberUsernames().remove(Bukkit.getOfflinePlayer(party.getLeader()).getName());
-
+                membersMinusLeader.remove(Bukkit.getOfflinePlayer(party.getLeader()).getName());
                 return getResults(args, membersMinusLeader);
             }
 
@@ -113,16 +108,16 @@ public class CommandBase implements CommandExecutor, TabCompleter {
             return result;
         }
 
-        return List.of(); // Return an empty array so it stops tab completing
+        return List.of();
     }
 
     private List<String> getResults(String[] args, List<String> toSearch) {
         List<String> results = new ArrayList<>();
         for (String s : toSearch) {
-            if (s.toLowerCase().startsWith(args[1].toLowerCase()))
+            if (s.toLowerCase().startsWith(args[1].toLowerCase())) {
                 results.add(s);
+            }
         }
         return results;
     }
-
 }

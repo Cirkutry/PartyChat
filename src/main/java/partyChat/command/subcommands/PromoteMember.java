@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import partyChat.config.Lang;
+import partyChat.util.Chat;
 
 import java.util.List;
 
@@ -18,55 +19,54 @@ public class PromoteMember extends PartySubCommand {
 	@Override
 	public void execute(Player player, String[] args) {
 		if (utils.getPlayerParty(player.getUniqueId()) == null) {
-			utils.message(player, "You are not in a party.");
+			utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_NOT_IN_PARTY.toString())); // Added prefix
 			return;
 		}
 
 		Party party = utils.getPlayerParty(player.getUniqueId());
 
 		if (!party.isLeader(player.getUniqueId())) {
-			utils.fail(player, "Only the party leader can do that.");
+			utils.fail(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_NOT_LEADER.toString())); // Added prefix
 			return;
 		}
 
 		if (args.length == 1) {
-			utils.message(player, "Usage: /party promote <player>");
+			utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.USAGE_PROMOTE.toString())); // Added prefix
 			return;
 		}
 
-		@SuppressWarnings("deprecation")
 		OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
 
 		if (!target.hasPlayedBefore() && !target.isOnline()) {
-			utils.fail(player, "That player has never joined the server before.");
+			utils.fail(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_PLAYER_NEVER_JOINED.toString())); // Added prefix
 			return;
 		}
 
 		if (!party.getMembers().contains(target.getUniqueId())) {
-			utils.message(player, target.getName() + " is not a member of your party.");
+			utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), String.format(Lang.ERROR_NOT_PARTY_MEMBER.toString(), target.getName()))); // Added prefix
 			return;
 		}
 
 		if (party.isPartyStaff(target.getUniqueId())) {
-			utils.message(player, "You cannot promote that party member any further.");
+			utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_CANNOT_PROMOTE_FURTHER.toString())); // Added prefix
 			return;
 		}
 
 		List<String> list = plugin.getYml().getStringList(party.name() + ".captains");
 		list.add(target.getUniqueId().toString());
-		party.broadcast(target.getName() + " has been promoted to party " + Lang.TRUSTED_RANK + " by "
-				+ player.getName() + ".");
+		party.broadcast(Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), String.format(Lang.PROMOTED_MESSAGE.toString(), target.getName(), player.getName()))); // Added prefix
 		plugin.getYml().set(party.name() + ".captains", list);
 		plugin.save();
 	}
 
 	@Override
 	public String description() {
-		return "Give a member invite and kick permissions.";
+		return Lang.DESCRIPTION_PROMOTE.toString();
 	}
 
 	@Override
 	public String usage() {
-		return "/party promote <player>";
+		return Lang.USAGE_PROMOTE.toString();
 	}
 }
+

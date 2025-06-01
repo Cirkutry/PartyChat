@@ -3,13 +3,16 @@ package partyChat.object;
 import partyChat.PartyChat;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Handles invites
+ * Invites expire after ten minute by default; todo: Add this to configuration
+ */
 public class InviteHandler {
     private final Map<UUID, Set<Invite>> map = new HashMap<>();
     private final PartyChat plugin;
@@ -32,6 +35,7 @@ public class InviteHandler {
 
         final int ONE_MINUTE_TICKS = 60 * 20;
 
+        // clear out after 10 minutes
         Bukkit.getScheduler().runTaskLater(plugin, () ->
                 inviteList.remove(invite), ONE_MINUTE_TICKS * 10L);
     }

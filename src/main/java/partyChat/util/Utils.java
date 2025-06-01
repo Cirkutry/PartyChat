@@ -8,10 +8,6 @@ public class Utils {
 
     public static DecimalFormat numberFormat = new DecimalFormat("#,###");
 
-    public static String formatNumber(double num) {
-        return numberFormat.format(num);
-    }
-
     public static String formatNumber(int num) {
         return numberFormat.format(num);
     }

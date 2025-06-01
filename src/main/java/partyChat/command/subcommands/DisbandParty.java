@@ -5,6 +5,7 @@ import partyChat.PartyChat;
 import partyChat.command.PartySubCommand;
 import org.bukkit.entity.Player;
 import partyChat.util.Chat;
+import partyChat.config.Lang;
 
 public class DisbandParty extends PartySubCommand {
     public DisbandParty(PartyChat plugin) {
@@ -13,29 +14,27 @@ public class DisbandParty extends PartySubCommand {
 
     @Override
     public void execute(Player player, String[] args) {
-        if (utils.getPlayerParty(player.getUniqueId()) == null) {
-            utils.fail(player, "You are not a member of any party.");
+        Party party = utils.getPlayerParty(player.getUniqueId());
+
+        if (party == null) {
+            utils.fail(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_NOT_IN_PARTY.toString()));
             return;
         }
 
-        Party party = utils.getPlayerParty(player.getUniqueId());
-
         if (!party.getLeader().equals(player.getUniqueId())) {
-            utils.fail(player, "Only the leader can disband the party.");
+            utils.fail(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_NOT_LEADER.toString()));
             return;
         }
 
         if (args.length < 3) {
-            var WARN = Chat.RED + "[!] " + Chat.RESET;
-            player.sendMessage(WARN + "You are about to disband " + Chat.GRAY + party.name() + Chat.WHITE + " forever.");
-            player.sendMessage(WARN + "Are you sure? Type " + Chat.RED + "/party disband <partyName> confirm" + Chat.RESET + " to continue.");
-        } else if (args[1].equals(party.name()) && args[2].equals("confirm")) {
-            party.broadcast("Your party has been disbanded.");
+            player.sendMessage(Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.WARNING_DISBAND_PARTY_START.toString(party.name())));
+            player.sendMessage(Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), String.valueOf(Lang.WARNING_DISBAND_PARTY_CONFIRM)));
+        } else if (args[1].equalsIgnoreCase(party.name()) && args[2].equalsIgnoreCase("confirm")) {
+            party.broadcast(Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.INFO_PARTY_DISBANDED.toString()));
             plugin.getYml().set(party.name(), null);
             plugin.save();
         }
     }
-
 
     @Override
     public String description() {
@@ -44,6 +43,7 @@ public class DisbandParty extends PartySubCommand {
 
     @Override
     public String usage() {
-        return "/party disband";
+        return "/party disband <partyname> confirm";
     }
 }
+

@@ -5,7 +5,6 @@ import partyChat.util.PartyChatUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -28,9 +27,6 @@ public abstract class PartySubCommand {
         return Collections.emptyList();
     }
 
-    /*
-    All party commands are player-only
-     */
     public abstract void execute(Player player, String[] args);
 
     public abstract String description();

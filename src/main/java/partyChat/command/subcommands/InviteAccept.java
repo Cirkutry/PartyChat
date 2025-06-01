@@ -7,6 +7,7 @@ import partyChat.command.PartySubCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import partyChat.config.Lang;
 import partyChat.util.Chat;
 
 import java.util.List;
@@ -18,34 +19,32 @@ public class InviteAccept extends PartySubCommand {
 
     @Override
     public void execute(Player player, String[] args) {
-        if (plugin.inviteHandler().getInvite(player.getUniqueId()) == null) {
-            utils.message(player, "You do not have a pending invite.");
+        Invite theInvite = plugin.inviteHandler().getInvite(player.getUniqueId());
+
+        if (theInvite == null) {
+            utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_NO_PENDING_INVITE.toString()));
             return;
         }
 
-        Invite theInvite = plugin.inviteHandler().getInvite(player.getUniqueId());
-
+        Party party = theInvite.getParty();
         YamlConfiguration yml = plugin.getYml();
 
-        Party party = theInvite.getParty();
-
-        List<String> l = yml.getStringList(party.name() + ".members");
-        l.add(player.getUniqueId().toString());
-        yml.set(party.name() + ".members", l);
+        List<String> members = yml.getStringList(party.name() + ".members");
+        members.add(player.getUniqueId().toString());
+        yml.set(party.name() + ".members", members);
         plugin.save();
 
         plugin.inviteHandler().removeInviteFromMap(theInvite);
 
-        utils.message(player, "Please wait...");
+        utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.WAIT_MESSAGE.toString()));
 
         Bukkit.getScheduler().runTaskLater(plugin, () ->
-                utils.message(player, "You have joined the party" + party.name() + "!"), 80);
+                utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), String.format(Lang.JOINED_PARTY.toString(), party.name()))), 80);
 
         Bukkit.getScheduler().runTaskLater(plugin, () ->
-                utils.message(player, "Hint: " + Chat.GRAY
-                        + "Type /party <message> to talk within your party."), 240);
+                utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.PARTY_CHAT_HINT.toString())), 240);
 
-        party.broadcast(player.getName() + " has joined the party!");
+        party.broadcast(Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), String.format(Lang.PLAYER_JOINED_PARTY.toString(), player.getName())));
     }
 
     @Override

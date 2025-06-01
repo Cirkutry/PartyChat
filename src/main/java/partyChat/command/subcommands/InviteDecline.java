@@ -5,6 +5,8 @@ import partyChat.PartyChat;
 import partyChat.object.Invite;
 import partyChat.command.PartySubCommand;
 import org.bukkit.entity.Player;
+import partyChat.config.Lang;
+import partyChat.util.Chat;
 
 public class InviteDecline extends PartySubCommand {
     public InviteDecline(PartyChat plugin) {
@@ -13,16 +15,16 @@ public class InviteDecline extends PartySubCommand {
 
     @Override
     public void execute(Player player, String[] args) {
-        if (plugin.inviteHandler().getInvite(player.getUniqueId()) == null) {
-            utils.message(player, "You do not have a pending invite.");
+        Invite theInvite = plugin.inviteHandler().getInvite(player.getUniqueId());
+
+        if (theInvite == null) {
+            utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), Lang.ERROR_NO_PENDING_INVITE.toString()));
             return;
         }
 
-		Invite theInvite = plugin.inviteHandler().getInvite(player.getUniqueId());
-		Party party = theInvite.getParty();
-
-        utils.message(player, "You declined the invite to join " + party.name() + ".");
-        party.broadcast(player.getName() + " declined the invite to join " + party.name() + ".");
+        Party party = theInvite.getParty();
+        utils.message(player, Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), String.format(Lang.INVITE_DECLINED.toString(), party.name())));
+        party.broadcast(Chat.formatWithPrefix(Lang.PARTY_TAG.toString(), String.format(Lang.PLAYER_DECLINED_INVITE.toString(), player.getName(), party.name())));
 
         plugin.inviteHandler().removeInviteFromMap(theInvite);
     }
@@ -37,3 +39,4 @@ public class InviteDecline extends PartySubCommand {
         return "/party decline";
     }
 }
+
